@@ -1,0 +1,10 @@
+core_cm3.h:917:26:NVIC_GetPriorityGrouping	4	static
+core_cm3.h:930:22:NVIC_EnableIRQ	16	static
+core_cm3.h:1014:22:NVIC_SetPriority	16	static
+core_cm3.h:1059:26:NVIC_EncodePriority	40	static
+uart.c:11:6:USART1_PC_Init	32	static
+uart.c:62:6:USART_PutChar	16	static
+uart.c:71:6:USART_PutString	16	static
+uart.c:81:10:USART_GetChar	8	static
+uart.c:90:6:USART_SendUInt_16	24	static
+uart.c:101:6:USART_SendUInt_32	24	static
