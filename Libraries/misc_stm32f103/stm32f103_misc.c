@@ -71,6 +71,7 @@ void Timer_setup(void)
 
 	 /*
 	 * UE [s] = ((PSC+1)*(TIM9_ARR+1))/fCK_PSC[Hz]
+	 * 	ts = 1/(freq/prescaler+1)*1200
 	 *
 	 */
 

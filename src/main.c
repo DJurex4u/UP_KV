@@ -27,6 +27,12 @@ volatile uint16_t pulse_ticks = 0;
 volatile unsigned long start_time = 0;
 volatile unsigned long end_time = 0;
 
+// moje varijable
+float motor_speed = 0;
+const int controller_frequency = 72000000;
+float num_of_encoder_ticks = 0;
+volatile int start_counting_tics = 0;
+
 
 /* UART receive interrupt handler */
 void USART1_IRQHandler(void)
@@ -60,6 +66,7 @@ void USART1_IRQHandler(void)
 
 
 /* TIM2 input capture interrupt */
+/* Okida svaki put kada dođe do rising-edgea */
 void TIM2_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM2, TIM_IT_CC4))
@@ -68,20 +75,32 @@ void TIM2_IRQHandler(void)
 		pulse_ticks = end_time - start_time;
         start_time = end_time;
 		TIM_ClearITPendingBit(TIM2, TIM_IT_CC4);
+
+		//za brzinu vrtnje
+		num_of_encoder_ticks++;
 	}
 
 }
 
 
 /* TIMER4 every 0.1 second interrupt --> sending data to PC */
+/* */
 void TIM4_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM4, TIM_IT_Update))
 	{
 		USART_PutChar('p');
 		USART_PutChar('m');
+		//salje signal UARTom na SerialPort
 		USART_SendUInt_32(pulse_ticks);
+		//USART_SendUInt_32(Get_PWM());
+		//USART_SendUInt_32(brzina_vrtnje);
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+
+		//Brzina vrtnje
+		motor_speed = (num_of_encoder_ticks / 0.1 ) * 60 / 41;
+		num_of_encoder_ticks = 0;
+		USART_SendUInt_32(motor_speed);
 	}
 }
 

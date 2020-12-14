@@ -7,7 +7,7 @@ stm32f103_misc.c:14:6:Systick_init	8	static
 stm32f103_misc.c:21:6:Delay_ms	16	static
 stm32f103_misc.c:27:6:Output_setup	16	static
 stm32f103_misc.c:56:6:Timer_setup	80	static
-stm32f103_misc.c:185:6:Button_init	16	static
-stm32f103_misc.c:200:5:Set_PWM_per	24	static
-stm32f103_misc.c:216:10:Get_PWM	4	static
-stm32f103_misc.c:221:6:Set_PWM	16	static
+stm32f103_misc.c:186:6:Button_init	16	static
+stm32f103_misc.c:201:5:Set_PWM_per	24	static
+stm32f103_misc.c:217:10:Get_PWM	4	static
+stm32f103_misc.c:222:6:Set_PWM	16	static
