@@ -27,6 +27,9 @@ volatile uint16_t pulse_ticks = 0;
 volatile unsigned long start_time = 0;
 volatile unsigned long end_time = 0;
 
+int num_of_clicks = 0;
+float velocity = 0;
+
 
 /* UART receive interrupt handler */
 void USART1_IRQHandler(void)
@@ -68,20 +71,26 @@ void TIM2_IRQHandler(void)
 		pulse_ticks = end_time - start_time;
         start_time = end_time;
 		TIM_ClearITPendingBit(TIM2, TIM_IT_CC4);
+
+		num_of_clicks++;
 	}
 
 }
 
 
-/* TIMER4 every 0.1 second interrupt --> sending data to PC */
+/* TIMER4 every 0.01 second interrupt --> sending data to PC */
 void TIM4_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM4, TIM_IT_Update))
 	{
 		USART_PutChar('p');
 		USART_PutChar('m');
-		USART_SendUInt_32(pulse_ticks);
+		velocity = num_of_clicks / 41.00 * 6000;
+		USART_SendUInt_32(velocity);
+		USART_SendUInt_32(100000);
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+
+		num_of_clicks = 0;
 	}
 }
 
