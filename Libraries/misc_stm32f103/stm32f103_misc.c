@@ -79,7 +79,7 @@ void Timer_setup(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 
 	TIM_TimeBaseInitTypeDef TIM4_InitStructure;
-	TIM4_InitStructure.TIM_Prescaler = 5999; 				//frequency prescaler - define Ts
+	TIM4_InitStructure.TIM_Prescaler = 599; 				//frequency prescaler - define Ts
 	TIM4_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM4_InitStructure.TIM_Period = 1199; 					//auto-reload register value - define Ts
 	TIM4_InitStructure.TIM_ClockDivision = TIM_CKD_DIV1;

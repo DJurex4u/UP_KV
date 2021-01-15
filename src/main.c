@@ -31,7 +31,7 @@ volatile unsigned long end_time = 0;
 float motor_speed = 0;
 const int controller_frequency = 72000000;
 float num_of_encoder_ticks = 0;
-volatile int start_counting_tics = 0;
+//volatile int start_counting_tics = 0;
 
 
 /* UART receive interrupt handler */
@@ -92,13 +92,13 @@ void TIM4_IRQHandler(void)
 		USART_PutChar('p');
 		USART_PutChar('m');
 		//salje signal UARTom na SerialPort
-		USART_SendUInt_32(pulse_ticks);
+		USART_SendUInt_32(100);
 		//USART_SendUInt_32(Get_PWM());
 		//USART_SendUInt_32(brzina_vrtnje);
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 
 		//Brzina vrtnje
-		motor_speed = (num_of_encoder_ticks / 0.1 ) * 60 / 41;
+		motor_speed = (num_of_encoder_ticks / 0.01 ) * 60 / 41;
 		num_of_encoder_ticks = 0;
 		USART_SendUInt_32(motor_speed);
 	}
