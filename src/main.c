@@ -14,6 +14,9 @@
 #include "stm32f10x_util.h"
 #include "stm32f10x_ina219.h"
 
+#include<stdio.h>
+#include<stdlib.h>
+
 /* global variables */
 volatile char receivedChar;
 volatile uint16_t currentPWM;
@@ -28,11 +31,13 @@ volatile unsigned long start_time = 0;
 volatile unsigned long end_time = 0;
 
 // moje varijable
-float motor_speed = 0;
-const int controller_frequency = 72000000;
-float num_of_encoder_ticks = 0;
-//volatile int start_counting_tics = 0;
 
+float motor_speed = 0;
+
+float num_of_encoder_ticks = 0;
+float prbs_width_in_ticks = 35;
+float prbs_tick_counter = 0;
+int myArray[3] = { 9800, 6950, 13200 };
 
 /* UART receive interrupt handler */
 void USART1_IRQHandler(void)
@@ -91,16 +96,48 @@ void TIM4_IRQHandler(void)
 	{
 		USART_PutChar('p');
 		USART_PutChar('m');
+
+
+		prbs_tick_counter++;
+
 		//salje signal UARTom na SerialPort
-		USART_SendUInt_32(100);
-		//USART_SendUInt_32(Get_PWM());
-		//USART_SendUInt_32(brzina_vrtnje);
+		USART_SendUInt_32(Get_PWM());
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 
 		//Brzina vrtnje
 		motor_speed = (num_of_encoder_ticks / 0.01 ) * 60 / 41;
 		num_of_encoder_ticks = 0;
 		USART_SendUInt_32(motor_speed);
+
+		//prbs_width_in_ticks
+		//prbs_counter
+		/*
+		prbs_tick_counter++;
+		if (prbs_tick_counter == prbs_width_in_ticks)
+		{
+			int randomIndex = rand() % 3;
+			//uint16_t randomValue =;
+			Set_PWM((uint16_t)myArray[randomIndex]);
+			Delay_ms(50);
+			prbs_tick_counter = 0;
+		}
+		*/
+		//int randomIndex = rand() % 3;
+		//Set_PWM((uint16_t)myArray[randomIndex]);
+
+		//Delay_ms(3000);
+
+
+
+				/*
+				srand ( time(NULL) );
+				int myArray[3] = { 9800, 6950, 13200 };
+				int randomIndex = rand() % 3;
+				int randomValue = myArray[randomIndex];
+				printf("Reference: %d\n", randomValue);
+				return 0;
+				 */
+
 	}
 }
 
@@ -124,6 +161,16 @@ int main(void)
 
 	while (1)
 	{
+
+		if (prbs_tick_counter == prbs_width_in_ticks)
+				{
+					int randomIndex = rand() % 3;
+					//uint16_t randomValue =;
+					Set_PWM((uint16_t)myArray[randomIndex]);
+					Delay_ms(50);
+					prbs_tick_counter = 0;
+				}
+		if ()
 		// read push button - stop motor
 		if(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_14))
 		{
@@ -133,7 +180,7 @@ int main(void)
 		// read push button - turn on motor
 		if(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_15))
 		{
-			Set_PWM(5000u);
+			Set_PWM(13200u);
 			Delay_ms(50);
 		}
 
