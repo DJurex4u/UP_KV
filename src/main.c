@@ -35,9 +35,13 @@ volatile unsigned long end_time = 0;
 float motor_speed = 0;
 
 float num_of_encoder_ticks = 0;
-float prbs_width_in_ticks = 35;
+float prbs_width_in_ticks = 30;
 float prbs_tick_counter = 0;
-int myArray[3] = { 9800, 6950, 13200 };
+int myArray[2] = {6500, 9500 };
+int myArray2[4] = {30, 35, 40, 45};
+int last = 0;
+int random_1 = 0;
+int random_2 = 0;
 
 /* UART receive interrupt handler */
 void USART1_IRQHandler(void)
@@ -164,13 +168,52 @@ int main(void)
 
 		if (prbs_tick_counter == prbs_width_in_ticks)
 				{
-					int randomIndex = rand() % 3;
-					//uint16_t randomValue =;
-					Set_PWM((uint16_t)myArray[randomIndex]);
-					Delay_ms(50);
+
+				/*
+					int randomIndex = rand() % 2;
+
+					if (random_1 == 0 && random_2== 0){
+						Set_PWM((uint16_t)myArray[1]);
+						Delay_ms(50);
+					} else if(random_1 == 1 && random_2== 1)
+					{
+						Set_PWM((uint16_t)myArray[0]);
+						Delay_ms(50);
+					}else
+					{
+						Set_PWM((uint16_t)myArray[randomIndex]);
+						Delay_ms(50);
+					}
+
+
+					random_1 = randomIndex;
+					random_2 = random_1;
+
 					prbs_tick_counter = 0;
+				*/
+
+
+			//nešto drugo
+
+
+					if (last == 0)
+					{
+						last = 1;
+						Set_PWM((uint16_t)myArray[1]);
+						Delay_ms(50);
+					}else if (last == 1)
+					{
+						last = 0;
+						Set_PWM((uint16_t)myArray[0]);
+						Delay_ms(50);
+					}
+					prbs_width_in_ticks = myArray2[rand() % 4];
+					prbs_tick_counter = 0;
+
+
 				}
-		if ()
+
+
 		// read push button - stop motor
 		if(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_14))
 		{
