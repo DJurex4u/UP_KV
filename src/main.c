@@ -40,8 +40,12 @@ float prbs_tick_counter = 0;
 int myArray[2] = {6500, 9500 };
 int myArray2[4] = {30, 35, 40, 45};
 int last = 0;
-int random_1 = 0;
-int random_2 = 0;
+
+
+float w_zadano = 2500;
+float w0 = 0;//3950;
+float stari_pwm = 0;
+float staro_reg_odstupanje = 0;
 
 /* UART receive interrupt handler */
 void USART1_IRQHandler(void)
@@ -52,20 +56,11 @@ void USART1_IRQHandler(void)
 		receivedChar = USART_GetChar();
 		if(receivedChar == 'u')
 		{
-			currentPWM = Get_PWM();
-			currentPWM += (uint16_t)500;
-			if(currentPWM < PWM_period)
-				Set_PWM(currentPWM);
+			w_zadano += 500;
 		}
 		else if(receivedChar == 'd')
 		{
-
-			currentPWM = Get_PWM();
-			if(currentPWM > 7000u)
-			{
-				currentPWM -= (uint16_t)500;
-				Set_PWM(currentPWM);
-			}
+			w_zadano -= 500;
 		}
 
 		USART_PutChar(receivedChar);
@@ -91,6 +86,16 @@ void TIM2_IRQHandler(void)
 
 }
 
+regulacija()
+{
+	double reg_odstupanje = w_zadano - (motor_speed + w0);
+			double pwm_upravljacki = stari_pwm + 1.973 * reg_odstupanje - 1.48 * staro_reg_odstupanje;
+
+			Set_PWM((uint16_t)pwm_upravljacki);
+
+			stari_pwm = pwm_upravljacki;
+			staro_reg_odstupanje = reg_odstupanje;
+}
 
 /* TIMER4 every 0.1 second interrupt --> sending data to PC */
 /* */
@@ -109,48 +114,43 @@ void TIM4_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 
 		//Brzina vrtnje
+
 		motor_speed = (num_of_encoder_ticks / 0.01 ) * 60 / 41;
 		num_of_encoder_ticks = 0;
 		USART_SendUInt_32(motor_speed);
+		USART_SendUInt_32(w_zadano);
 
-		//prbs_width_in_ticks
-		//prbs_counter
-		/*
-		prbs_tick_counter++;
-		if (prbs_tick_counter == prbs_width_in_ticks)
-		{
-			int randomIndex = rand() % 3;
-			//uint16_t randomValue =;
-			Set_PWM((uint16_t)myArray[randomIndex]);
-			Delay_ms(50);
-			prbs_tick_counter = 0;
-		}
-		*/
-		//int randomIndex = rand() % 3;
-		//Set_PWM((uint16_t)myArray[randomIndex]);
-
-		//Delay_ms(3000);
-
-
-
-				/*
-				srand ( time(NULL) );
-				int myArray[3] = { 9800, 6950, 13200 };
-				int randomIndex = rand() % 3;
-				int randomValue = myArray[randomIndex];
-				printf("Reference: %d\n", randomValue);
-				return 0;
-				 */
-
+		//Regulator
+		regulacija();
 	}
-}
 
+}
 
 /* systick timer for periodic tasks */
 void SysTick_Handler(void)
 {
 	noMs++;
 }
+
+	void prbs_function()
+	{
+		if (prbs_tick_counter == prbs_width_in_ticks)
+			{
+				if (last == 0)
+					{
+							last = 1;
+							Set_PWM((uint16_t)myArray[1]);
+							Delay_ms(50);
+						}else if (last == 1)
+						{
+							last = 0;
+							Set_PWM((uint16_t)myArray[0]);
+							Delay_ms(50);
+						}
+						prbs_width_in_ticks = myArray2[rand() % 4];
+						prbs_tick_counter = 0;
+					}
+	}
 
 
 /* main program - init peripherals and loop */
@@ -166,64 +166,19 @@ int main(void)
 	while (1)
 	{
 
-		if (prbs_tick_counter == prbs_width_in_ticks)
-				{
-
-				/*
-					int randomIndex = rand() % 2;
-
-					if (random_1 == 0 && random_2== 0){
-						Set_PWM((uint16_t)myArray[1]);
-						Delay_ms(50);
-					} else if(random_1 == 1 && random_2== 1)
-					{
-						Set_PWM((uint16_t)myArray[0]);
-						Delay_ms(50);
-					}else
-					{
-						Set_PWM((uint16_t)myArray[randomIndex]);
-						Delay_ms(50);
-					}
-
-
-					random_1 = randomIndex;
-					random_2 = random_1;
-
-					prbs_tick_counter = 0;
-				*/
-
-
-			//nešto drugo
-
-
-					if (last == 0)
-					{
-						last = 1;
-						Set_PWM((uint16_t)myArray[1]);
-						Delay_ms(50);
-					}else if (last == 1)
-					{
-						last = 0;
-						Set_PWM((uint16_t)myArray[0]);
-						Delay_ms(50);
-					}
-					prbs_width_in_ticks = myArray2[rand() % 4];
-					prbs_tick_counter = 0;
-
-
-				}
+		//prbs_function();
 
 
 		// read push button - stop motor
 		if(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_14))
 		{
-			Set_PWM(0u);
+			Set_PWM(7000u);
 			Delay_ms(50);
 		}
 		// read push button - turn on motor
 		if(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_15))
 		{
-			Set_PWM(13200u);
+			Set_PWM(8000u);
 			Delay_ms(50);
 		}
 
